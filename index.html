@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>film quiz</title>
+  <style>
+	  
+ @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,500;0,600;1,500;1,600&display=swap');
+ 
+ 
+ 	  body{ 
+		text-align:center;     
+    	font-family: 'Poppins', sans-serif;
+		overflow:hidden; 
+		margin:0;
+		background-image: url(images/background.jpg);
+		background-position: top center;
+		background-repeat: no-repeat;
+		//background-size: COVER;
+
+	  
+	  }
+	  
+	  body {
+	    min-height: 100vh;
+	    /* mobile viewport bug fix */
+	    min-height: -webkit-fill-available;
+	  }
+
+	  html {
+	    height: -webkit-fill-available;
+	  }
+	  
+	  
+	  #timer{ width:100%; border-bottom:1px solid white; text-align:left; padding: 10px; box-sizing: border-box;}
+	  #timerbar{ height:20px; background:black; width:100%; border-radius:5px; box-sizing: border-box;}
+	  
+	  .qimg{ max-height: 250px;filter: blur(4px);}
+	  
+	  .btn{ cursor:pointer; background:#111; color:white; border:1px solid black; padding:10px; margin:30vh 30px 0px;}
+	  #score{ width:30px; height:30px; font-weight:bold; line-height:30px; text-align:center; background:white; border:2px solid black; position:absolute; border-radius: 10px; bottom:10px; right:10px;}
+	  .plot-quote{ font-size:20px;}
+	  
+	  #container{
+	  	margin:20px 0px;
+		width:90vw;
+		max-width: 500px;
+		border:1px solid #FFFFFE;
+		border-radius:10px;
+		height:80vh;
+		box-sizing: border-box;
+		position:relative;  
+		overflow-y: auto;
+		/*background:aliceblue;*/
+	  }
+	  #screen, .question-holder:not(:nth-child(5)){margin-top:100vh;}
+
+	  #screen{ 
+	  	border:1px solid white; 
+	  	padding:30px; 
+	  	color: #222; 
+	  	margin-left:30px; 
+	  	margin-right:30px;
+	  	text-align:left;
+	  	font-size:20px;
+	  	border-radius:10px;
+	  }
+	  #screen input[type="text"]{
+	  	background: none;
+	  	font-family:  'Poppins', sans-serif;
+	  	color: #879ca5;
+	  	border:1px solid white;
+	  	margin-top:10px;
+	  	PADDING: 5PX;
+		COLOR: WHITE;
+		FONT-SIZE: 20PX;
+		FONT-WEIGHT: BOLD;}
+	  .question-holder{padding:20px; display:none; position:absolute;}
+	  
+	  .question{ padding:0px 0px 20px 0px;}
+	  
+	  .plot-quote{ padding:10px; font-family:serif; display:block;}
+	  
+	  .answers{ overflow:auto;}
+	  
+	  .answers span{
+		  padding:10px 0px; 
+		  display:inline-block;
+		  margin-bottom:10px;
+		  min-width:250px; 
+		  cursor:pointer;
+		  font-weight:bold;
+		  background:#111;
+		  color:white;
+	  }
+	  
+	  #sub{ font-size:12px; line-height:100%;}
+	  
+	  input { margin-bottom:20px; padding: 5px; font-size:20px; width:100%; box-sizing:border-box;}
+	  /*.answers span:hover{ background:#EEEEEE; }*/
+  </style>
+  <script type="text/javascript" src="filmlist.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+</head>
+<body>
+<div align="center">
+	
+	<div id="container">
+		<div id="timer"><div id="timerbar"></div></div>
+		<div id="score">0</div>
+		<div class = "btn">Begin</DIV>
+			<div class="leaderlink"><Br> or <a href="leaders.php" style='color:black;font-weight:bold;'>view the leaderboard</a></div>
+		
+	</div>
+</div>
+<script>
+$(document).ready(function() {
+
+
+	//mega quiz
+	
+	//filmlist.push();
+	
+	
+	
+	function shuffle(arra1) {
+	    var ctr = arra1.length, temp, index;
+
+	// While there are elements in the array
+	    while (ctr > 0) {
+	// Pick a random index
+	        index = Math.floor(Math.random() * ctr);
+	// Decrease ctr by 1
+	        ctr--;
+	// And swap the last element with it
+	        temp = arra1[ctr];
+	        arra1[ctr] = arra1[index];
+	        arra1[index] = temp;
+	    }
+	    return arra1;
+	}
+	
+	filmlist = shuffle(filmlist);
+	
+	//console.log(filmlist);
+	
+	var filmlistX = [];
+	var holder = "";
+	
+	var points = 0;
+	
+	var checker = 0;
+	
+	var answerList = [];
+	var currentQ = 0;
+	
+	var quizready = false;
+	
+	
+	function pickAnswers(iteration, QNUM){
+		if(QNUM == 4){
+			answerList = [];
+			var year = parseInt(filmlistX[iteration].Year);
+			answerList.push(year);
+			
+			answerList.push(year - 2);
+			if(year <= 2017){
+				answerList.push(year + 4);
+				answerList.push(year + 2);
+			}else{
+				answerList.push(year - 3);
+				answerList.push(year - 4);
+			}
+			
+			answerList.sort( () => .5 - Math.random() );
+			return answerList;
+		}
+		else{
+			answerList = [];
+			answerList.push(iteration);
+			for(var j=0; j<3; j){
+				var randomA = Math.floor(Math.random() * (filmlistX.length));
+				if(!answerList.includes(randomA) && randomA != iteration)
+				{
+					answerList.push(randomA);
+					j++;
+				}
+			};
+			answerList.sort( () => .5 - Math.random() );
+			return answerList;
+		}
+	} 
+	
+	function anagram(word){
+		var randomselect = Math.floor(Math.random() * (word.length-1)); 
+		var remainingword = word.toUpperCase();
+		var randomcharacter = remainingword.charAt(randomselect);
+		
+		if(word.length > 1){
+		
+			remainingword = remainingword.replace(randomcharacter, '');
+
+			if(randomcharacter != " "){
+				holder += randomcharacter;
+			}
+			
+			anagram(remainingword);
+		}
+		else
+		{
+			holder += remainingword;
+
+		}
+		return holder;
+	}
+	
+	for( var i=0; i < filmlist.length; i++)
+	{
+		if(filmlistX.length < 50){
+					break;
+			}
+		
+		var URL = "http://www.omdbapi.com/?t=" + encodeURI(filmlist[i].title) + "&y=" + filmlist[i].year + "&apikey=9e1b6cd0&type=movie";
+		
+		$.getJSON(URL, function(data){	
+			
+			//data.orig_title = 'HELLO!' + String(i);
+
+			
+			
+			if(data.Response == "True"){		
+				filmlistX.push(data);
+				
+			}else{
+				console.log("Not added: " + data.Title);
+			}
+		});
+			
+	}
+	//for( var i=0; i < filmlist.length; i++)
+	//{
+	//	console.log(filmlist[i].title + " is not " + filmlistX[i].title); 
+	//}
+	//console.log(filmlistX);
+	
+	function loadEndScreen(){
+		// bring up the ENTER YOUR DETAILS screen
+		console.log("Quiz Over! Enter your details.");
+		$("#timerbar").stop();
+		$("#timerbar").css("width","100%");
+	
+	
+		$('#container').append("<form action='leaders.php' id='screen' method='post'>Your name:<Br><input name='name' type='text'><input name='score' type='hidden' value='" + points + "'/>Message:<br><SPAN id='sub'>(optional, leave blank for a random movie quote!)</SPAN><input type='text' name='flair' placeholder='fightin&apos; talk?'><br><br><input type='submit' value='enter score'></form>");
+	
+		$('.question-holder').hide();
+		 
+		$('#screen').show();
+		$( $('#screen')).animate({
+			marginTop: "30"
+		}, 800);
+		//$("input[name='name']").focus(); 
+	}
+	
+	function timerReset(){
+		$("#timerbar").stop();
+		$( $('#timerbar') ).animate({
+			width: "100%"
+		}, 10, function(){
+			
+			console.log('Timer refilled.');
+			checker++;
+			console.log(checker);
+			
+			$( $('#timerbar') ).delay( 800 ).animate({
+				width: "0%"
+			}, 12000, function(){
+				console.log('Timed out!');
+				
+				
+				
+				//NEXT QUESTION
+				$( $('#QH' + currentQ) ).animate({
+					opacity: 0.4,
+					marginTop: "-1000"
+				}, 800, function(){
+					
+					
+					$(this).hide();
+					
+		
+				});
+				
+				if( currentQ != filmlistX.length - 1){
+			 
+					//increase the question number
+					currentQ ++;
+					console.log("Question " + currentQ + " of " + filmlistX.length);
+
+					$('#QH' + currentQ).show();
+		
+					$( $('#QH' + currentQ) ).delay( 800 ).animate({
+						marginTop: "0"
+					}, 1200);
+		
+					timerReset();
+				 
+		
+				}
+				else{loadEndScreen();}
+			});
+		});
+	}	
+	
+	
+	// click button to generate the quiz and start 																	
+	$(document).on('click', '.btn', function(){
+		console.log('Quiz started!');
+	 	$( $('.btn, .leaderlink') ).animate({
+			opacity: 0.1
+		}, 800, function(){
+		
+			$('.btn').hide();
+			$('.leaderlink').hide();
+			
+			$( '#QH0' ).css('opacity', '0');
+			$( '#QH0' ).css('display', 'block');
+			
+			console.log("Let's go! Question 0:");
+			
+		 	$( $('#QH0') ).animate({
+				opacity: 0.9
+			}, 1200, function(){
+				$('#QH0').show();	
+				
+			 	timerReset();
+				quizready = true;
+				
+			});	
+		});
+		
+		// DRAW THE BOXES
+		console.log('Generating Questions...');
+		for(var i = 0; i < filmlistX.length; i++){
+		
+			
+			holder = "";
+			console.log('Question ' + String(i) + " of " + String(filmlistX.length));		
+			var ana = anagram(filmlistX[i].Title);
+			
+			var questions = [
+				'Which film was directed by<br><strong>' + filmlistX[i].Director + '</strong>?<BR>',
+				'Which film does this describe?<br><em class="plot-quote">' + filmlistX[i].Plot + '</em><br>',
+				'Which film stars these actors?<br>' + filmlistX[i].Actors + '<br>',
+				'Which film title has been mixed up here?<strong>:<br>' + ana + '</strong><br>',
+				'What year was ' + filmlistX[i].Title + ' released?<br>',
+				'Which movie poster have I blurred?<br><br><img class="qimg" src="' + filmlistX[i].Poster + '"/>'
+			];
+		
+			var randomQ = Math.floor(Math.random() * (questions.length));
+			
+			//bad match cases
+			function checkBadMatch(){
+				if(randomQ == 3 && filmlistX[i].Title.length <= 4)
+				{
+					console.log('Tiny anagram avoided!');
+					randomQ = Math.floor(Math.random() * (questions.length));
+					checkBadMatch();
+				}
+			}
+			if(randomQ == 3){
+				var TEMPRANDOM = Math.floor(Math.random() * 1);
+				if(TEMPRANDOM == 1)
+				{
+					TEMPRANDOM = Math.floor(Math.random() * 1);
+					if(TEMPRANDOM == 1)
+					{
+						randomQ ++;
+					}
+					else{
+						randomQ +=2;
+					}
+				}
+			}
+			checkBadMatch();
+		
+			answerList = pickAnswers(i, randomQ);
+			
+			if(randomQ == 4){
+				// YEAR ANSWER
+				
+				$('#container').append("<div class='question-holder' id='QH" + i + "'><div class='question'>" + questions[randomQ] + "</div><div class='answers'><span>" + answerList[0] + "</span><span>" + answerList[1] + "</span><span>" + answerList[2] + "</span><span>" + answerList[3]  + "</span></div></div>" );
+				
+			}else{
+				
+				// GENERIC TITLE ANSWER
+	
+			$('#container').append("<div class='question-holder' id='QH" + i + "'><div class='question'>" + questions[randomQ] + "</div><div class='answers'><span>" + filmlistX[answerList[0]].Title + "</span><span>" + filmlistX[answerList[1]].Title + "</span><span>" + filmlistX[answerList[2]].Title + "</span><span>" + filmlistX[answerList[3]].Title  + "</span></div></div>" );
+			}
+		}
+		
+		
+	
+	});
+	
+	
+	
+$(document).on('click', 'span', function nextQ() {
+	if(checker >= 2){
+	
+	
+	//check answer
+	if($(this).is(':contains("' + filmlistX[currentQ].Title + '")') || $(this).is(':contains("' + filmlistX[currentQ].Year + '")')) 
+	{
+		points ++;
+		$('#score').html(points);
+		console.log("Correct Answer: " + points + " points.");
+		$(this).css('background', 'green');
+		$('#QH' + currentQ + ' .question img').css('filter', 'blur(0)')
+	}else{
+		console.log("Wrong Answer: Still " + points + " points.");
+		$(this).css('background', 'red');
+	}
+		 
+	//slide the answered question up ond off
+	$( $('#QH' + currentQ) ).delay( 800 ).animate({
+		opacity: 0.4,
+		marginTop: "-1000"
+	}, 800, function(){
+		$(this).hide();
+	});
+		
+	// if not the last question, slide the next question up
+	if( currentQ == filmlistX.length - 1){
+		
+		loadEndScreen();
+				 
+		
+	}else{
+		
+		//increase the question number
+		currentQ ++;
+		console.log("Question " + currentQ + " of " + String(filmlistX.length-1));
+
+		$('#QH' + currentQ).show();
+		
+		$( $('#QH' + currentQ) ).delay( 800 ).animate({
+			marginTop: "0"
+		}, 1200);
+		
+		timerReset();
+		
+	}
+}
+		 
+		
+		
+	
+				
+				
+});		
+
+		
+});
+
+	
+
+</script>
+ 
+</body>
+</html>
