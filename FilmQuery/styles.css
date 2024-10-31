@@ -1,0 +1,88 @@
+#searchbar{
+    background-color: rgba(0,0,0,0.5);
+}
+
+body{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    margin: 0;
+}
+/* A grid of film posters, center aligned using flex */
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    background-color: #f1f1f1;
+ 
+}
+
+.grid-item {
+    text-align: center;
+    position: relative;
+    background-color: black;
+    max-width: 200px;
+    margin: 10px;
+}
+
+.grid-item img {
+    width: 100%;
+    height: auto;
+}
+
+.grid-item:hover .overlay {
+    opacity: 1;
+}
+.grid-item:hover img {
+    opacity: 0.5;
+}
+
+.section{
+    padding: 30px;
+    border-top:1px solid #EEE;
+    border-bottom: 1px solid #EEE;
+}
+
+
+
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    box-sizing: border-box;
+    padding: 15px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    text-align: left;
+    transition: .5s ease;
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+}
+
+#leaderboard-section{
+    padding: 30px;
+    border: 1px solid black;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#leaderboards {
+    width: 100%;
+}
+
+#leaderboards td {
+    vertical-align: top;
+    padding: 20px;
+    border: 1px solid black;
+    width: 33%;
+    background-color: white;
+    border-radius:10px
+}
+
+#leaderboards ol{
+    padding-left: 20px;
+}

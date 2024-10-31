@@ -1,14 +1,46 @@
 
 <html>
 <head>
-  <meta charset="utf-8">
-<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-<script type="text/javascript" src="filmlist.js"></script>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="styles.css">
+	<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+	<script type="text/javascript" src="../Data/FilmList-TEST.js"></script>
+
+	<style>
+		/* A grid of film posters */
+		.grid-container {
+			display: grid;
+			grid-template-columns: auto auto auto auto;
+			grid-gap: 10px;
+			padding: 10px;
+		}
+
+		.grid-item {
+			text-align: center;
+		}
+
+		.grid-item img {
+			width: 100%;
+			height: auto;
+		}
+	</style>
 </head>
 
 
 <body>
-<div id="display"></div>
+
+	<?php include 'searchbar.php';?>
+
+
+	<div>
+		<!-- A grid of film posters -->
+		<div class="grid-container">
+		</div>
+	</div>
+	
+
+
+
 </body>
 <script>
 
@@ -46,7 +78,8 @@
 
 	for( var i=0; i < filmlist.length; i++)
 	{
-		var URL = "http://www.omdbapi.com/?t=" + encodeURI(filmlist[i].title) + "&y=" + filmlist[i].year + "&apikey=9e1b6cd0&type=movie";
+		//var URL = "http://www.omdbapi.com/?apikey=9e1b6cd0&t=" + encodeURI(filmlist[i].title) + "&y=" + filmlist[i].year + "&type=movie";
+		var URL = "https://www.omdbapi.com/?apikey=9e1b6cd0&t=" + encodeURI(filmlist[i].title);
 		
 		$.getJSON( URL, function( data ){
 			if(data.Response == "True"){
@@ -176,6 +209,11 @@
 	//console.log(ACTOR_OBJECTS);
 	//console.log(DIRECTOR_OBJECTS);
 	//console.log(COUNTRYARRAY);
+
+
+
+	// Create a grid of film posters
+	
 
 
 
