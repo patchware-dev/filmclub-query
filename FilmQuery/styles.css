@@ -2,6 +2,10 @@
     background-color: rgba(0,0,0,0.5);
 }
 
+*{
+    box-sizing: border-box;
+}
+
 body{
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     margin: 0;
@@ -85,4 +89,74 @@ body{
 
 #leaderboards ol{
     padding-left: 20px;
+}
+
+#loading-bar-container {
+    width: 100%;
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+#loading-bar {
+    width: 0;
+    height: 30px;
+    background-color: #4caf50;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+}
+
+.pickerFlag{
+    /* nested in the bottom right */
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50px;
+    height: 20px;
+    color: white;
+    font-size: 12px;
+    background-color: #4caf50;
+    text-align: center;
+    line-height: 20px;
+    text-transform: uppercase;
+}
+
+.KelvCol{
+    background-color: #974242;
+}
+.KyleCol{
+    background-color: #425397;
+}
+.PhilCol{
+    background-color: #6b9742;
+}
+.DomCol{
+    background-color: #977042;
+}
+.VasCol{
+    background-color: #744297;
+}
+.JackCol{
+    background-color: orange;
+}
+.KitCol{
+    background-color: #974276;
+}
+.IvanCol{
+    background-color: #5d4545;
+}
+
+
+/* Mobiles */
+@media screen and (max-width: 600px) {
+    .grid-item {
+        max-width: 100%;
+    }
+
+    #leaderboards td{
+        width: 100%;
+        display: block;
+    }
+    
 }

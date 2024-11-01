@@ -2,15 +2,15 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="styles.css">
+		<link rel="stylesheet" href="styles.css?test=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-		<script type="text/javascript" src="../Data/FilmList.js?version=2"></script>
+		<script type="text/javascript" src="../Data/FilmList.js?version=3"></script>
 	
 	</head>
 
 
 	<body>
-
 		<div align="center" id="searchbar" class="section">
 			<h1>filmQuery</h1>
 			<p>query <span id="filmcount">number</span> films watched in filmclub</p>
@@ -38,6 +38,9 @@
 		<div class="section">
 			<!-- A grid of film posters -->
 			<div class="grid-container">
+				<div id="loading-bar-container">
+					<div id="loading-bar"></div>
+				</div>
 			</div>
 		</div>
 
@@ -82,50 +85,113 @@
 	</body>
 	<script>
 
-		$.ajaxSetup({
-			async: false
-		});
-
-		// FILMLIST lives in FilmList-TEST.js
-
-		var EnrichedFilmData = [];
-
-		//loading message in gridCONTAINER
-		document.querySelector(".grid-container").innerHTML = "<h1>Loading...</h1>";
-
-
-		// Loop through the FILMLIST and get the data from OMDB
-		for( var i=0; i < filmlist.length; i++)
-		{
-			//var URL = "http://www.omdbapi.com/?apikey=9e1b6cd0&t=" + encodeURI(filmlist[i].title) + "&y=" + filmlist[i].year + "&type=movie";
-			var URL = "https://www.omdbapi.com/?apikey=9e1b6cd0&t=" + encodeURI(filmlist[i].title);
-			
-			$.getJSON( URL, function( data ){
-				if(data.Response == "True"){
-					EnrichedFilmData.push(data);
-
-					// Add local data to the array object (watchdate, picker, avScore)
-					EnrichedFilmData[EnrichedFilmData.length-1].watchdate = filmlist[i].watchdate;
-					EnrichedFilmData[EnrichedFilmData.length-1].picker = filmlist[i].picker;
-					EnrichedFilmData[EnrichedFilmData.length-1].avScore = filmlist[i].avScore;
-
-					
-				}
-			});
-		}
-
-		//READY in GridContainer
-		document.querySelector(".grid-container").innerHTML = "<h1>Ready</h1>";
-
-		console.log(EnrichedFilmData);
-
-		// update filmcount
-		document.getElementById("filmcount").innerHTML = EnrichedFilmData.length;
+		 
 
 		
+		//loading message in gridCONTAINER
+		var gridContainer =  document.querySelector(".grid-container");
+		
+		// FILMLIST lives in FilmList-TEST.js
+		var EnrichedFilmData = [];
+		var totalFilms = filmlist.length;
+   		var loadedFilms = 0;
+		var APIcalls = 0;
 
+		var filmPromises = filmlist.map(function(film) {
+			return getFilmData(film.title, film.year).then(function(data) {
+				if (data) {
+					data.watchdate = film.watchdate;
+					data.picker = film.picker;
+					data.avScore = film.avScore;
+					EnrichedFilmData.push(data);
+				}
+				loadedFilms++;
+            	updateLoadingBar(loadedFilms, totalFilms);
+			});
+		});
 
+		// Function to get film data from cache or API
+		function getFilmData(title, year) {
 
+			var cacheKey = title + "_" + year;
+			var cachedData = localStorage.getItem(cacheKey);
+
+			if (cachedData) {
+
+				console.log("Using cached data for " + title + " (" + year + ")");
+				return Promise.resolve(JSON.parse(cachedData));
+
+			} else {
+
+				console.log("Fetching fresh data for " + title + " (" + year + ")");
+				var URL = "https://www.omdbapi.com/?apikey=9e1b6cd0&t=" + encodeURI(title) + "&y=" + year;
+				return $.getJSON(URL).then(function(data) {
+					if (data.Response == "True") {
+						localStorage.setItem(cacheKey, JSON.stringify(data));
+						return data;
+					} else {
+						console.log("Error fetching data for " + title + " (" + year + ")");
+						return null;
+					}
+				});
+				APIcalls++;
+			}
+		}
+
+		// Function to update the loading bar
+		function updateLoadingBar(loaded, total) {
+			var percentage = (loaded / total) * 100;
+			var loadingBar = document.getElementById("loading-bar");
+			loadingBar.style.width = percentage + "%";
+			loadingBar.textContent = Math.round(percentage) + "%";
+		}
+
+		Promise.all(filmPromises).then(function() {
+			console.log(EnrichedFilmData);
+			console.log("API calls: " + APIcalls);
+			document.getElementById("filmcount").innerHTML = EnrichedFilmData.length;
+
+			// Populate the lists of most popular actors and directors
+			// ACTORS
+			var mostPopularActors = getMostPopularActors();
+			var leaderboard = document.querySelector("#actorlist");
+			leaderboard.innerHTML = "";
+			for (var i = 0; i < mostPopularActors.length; i++) {
+				var li = document.createElement("li");
+				li.textContent = mostPopularActors[i][0] + " (" + mostPopularActors[i][1] + " films)";
+				leaderboard.appendChild(li);
+			}
+			
+			// DIRECTORS
+			var mostPopularDirectors = getMostPopularDirectors();
+			var leaderboard = document.querySelector("#directorlist");
+			leaderboard.innerHTML = "";
+			for (var i = 0; i < mostPopularDirectors.length; i++) {
+				var li = document.createElement("li");
+				li.textContent = mostPopularDirectors[i][0] + " (" + mostPopularDirectors[i][1] + " films)";
+				leaderboard.appendChild(li);
+			}
+			
+			// TOP RATED
+			var topRatedFilms = getTopRatedFilms();
+			var leaderboard = document.querySelector("#ratingList");
+			leaderboard.innerHTML = "";
+			for (var i = 0; i < topRatedFilms.length; i++) {
+				var li = document.createElement("li");
+				li.textContent = topRatedFilms[i].Title + " (" + topRatedFilms[i].avScore + ")";
+				leaderboard.appendChild(li);
+			}
+
+			// Add event listener to the search form
+			document.querySelector("form").addEventListener("submit", function(event){
+				event.preventDefault();
+				var searchtype = document.querySelector("select").value;
+				var search = document.querySelector("input").value;
+				ChooseFilter(searchtype, search);
+			});
+		});
+
+		
 
 		// Function to get the most popular actors
 		function getMostPopularActors() {
@@ -158,18 +224,11 @@
 			return topActors;
 		}
 
-		// Call the function and log the result
-		var mostPopularActors = getMostPopularActors();
-		console.log(mostPopularActors);
+		
 
-		// Optionally, update the leaderboard in the HTML
-		var leaderboard = document.querySelector("#actorlist");
-		leaderboard.innerHTML = "";
-		for (var i = 0; i < mostPopularActors.length; i++) {
-			var li = document.createElement("li");
-			li.textContent = mostPopularActors[i][0] + " (" + mostPopularActors[i][1] + " films)";
-			leaderboard.appendChild(li);
-		}
+
+
+
 
 		// Function to get the most popular directors
 		function getMostPopularDirectors() {
@@ -203,18 +262,7 @@
 			return topDirectors;
 		}
 
-		// Call the function and log the result
-		var mostPopularDirectors = getMostPopularDirectors();
-		console.log(mostPopularDirectors);
-
-		// Optionally, update the leaderboard in the HTML
-		var leaderboard = document.querySelector("#directorlist");
-		leaderboard.innerHTML = "";
-		for (var i = 0; i < mostPopularDirectors.length; i++) {
-			var li = document.createElement("li");
-			li.textContent = mostPopularDirectors[i][0] + " (" + mostPopularDirectors[i][1] + " films)";
-			leaderboard.appendChild(li);
-		}
+		
 
 
 
@@ -236,34 +284,7 @@
 			return topRatedFilms;
 		}
 
-		// Call the function and log the result
-		var topRatedFilms = getTopRatedFilms();
-		console.log(topRatedFilms);
-
-		// Optionally, update the leaderboard in the HTML
-		var leaderboard = document.querySelector("#ratingList");
-		leaderboard.innerHTML = "";
-		for (var i = 0; i < topRatedFilms.length; i++) {
-			var li = document.createElement("li");
-			li.textContent = topRatedFilms[i].Title + " (" + topRatedFilms[i].avScore + ")";
-			leaderboard.appendChild(li);
-		}
-
-
-
-
-
-
-
 		
-
-		// Add event listener to the search form
-		document.querySelector("form").addEventListener("submit", function(event){
-			event.preventDefault();
-			var searchtype = document.querySelector("select").value;
-			var search = document.querySelector("input").value;
-			ChooseFilter(searchtype, search);
-		});
 
 
 		function ChooseFilter(searchtype, search){
@@ -413,11 +434,9 @@
 			return filteredFilms;
 		}
 
-
-
 		function UpdateGridTo(visibleFilmList){
 			// Clear the grid
-			document.querySelector(".grid-container").innerHTML = "";
+			gridContainer.innerHTML = "";
 
 			// Create a grid of film posters
 			for( var i=0; i < visibleFilmList.length; i++)
@@ -457,10 +476,16 @@
 				overlay.className = "overlay";
 				overlay.innerHTML = title + " (" + year + ")<br><span style='font-size:12px'>Dir: " + director + "<br>Country: " + country + "<br>Genre: " + genre + "<br>Average Score: " + avScore + "<br>Watched On: " + watchdate + "<br>Picked by: " + picker + "</span>";
 
+				var pFlag = document.createElement("span");
+
+				pFlag.classList.add("pickerFlag", picker + "Col");
+				
+				pFlag.innerHTML = picker;
+
 
 				gridItem.appendChild(img);
-				//gridItem.appendChild(p);
 				gridItem.appendChild(overlay);
+				gridItem.appendChild(pFlag);
 
 				document.querySelector(".grid-container").appendChild(gridItem);
 			}
