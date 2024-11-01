@@ -23,7 +23,7 @@
 					<option value="year">Films from the year: </option>
 					<option value="director">Films directed by: </option>
 					<option value="picker">Films picked by: </option>
-					<option value="decade">Films from the decade: </option>
+					<option value="decade">Films from the decade beginning: </option>
 					<option value="country">Films from the country: </option>
 					<option value="higherthanaverage">Films with an average rating higher than: </option>
 					<option value="lowerthanaverage">Films with an average rating lower than: </option>
@@ -45,7 +45,7 @@
 		</div>
 
 
-		<div id="leaderboard-section" class="section">
+		<div id="leaderboard-section" class="section" align="center">
 			<h2>Leaderboards:</h2>
 			<table id="leaderboards" cellspacing="10">
 				<tr>
@@ -320,9 +320,10 @@
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
 				var actors = EnrichedFilmData[i].Actors;
-				if(actors.includes(actorname)){
+				if(actors.toLowerCase().includes(actorname.toLowerCase())){
 					filteredFilms.push(EnrichedFilmData[i]);
 				}
+				
 			}
 			UpdateGridTo(filteredFilms);
 			return filteredFilms;
@@ -333,7 +334,7 @@
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
 				var filmtitle = EnrichedFilmData[i].Title;
-				if(filmtitle.includes(title)){
+				if(filmtitle.toLowerCase().includes(title.toLowerCase())){
 					filteredFilms.push(EnrichedFilmData[i]);
 				}
 			}
@@ -359,7 +360,7 @@
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
 				var director = EnrichedFilmData[i].Director;
-				if(director.includes(directorname)){
+				if(director.toLowerCase().includes(directorname.toLowerCase())){
 					filteredFilms.push(EnrichedFilmData[i]);
 				}
 			}
@@ -372,7 +373,7 @@
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
 				var picker = EnrichedFilmData[i].picker;
-				if(picker.includes(pickername)){
+				if(picker.toLowerCase().includes(pickername.toLowerCase())){
 					filteredFilms.push(EnrichedFilmData[i]);
 				}
 			}
@@ -400,7 +401,7 @@
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
 				var filmcountry = EnrichedFilmData[i].Country;
-				if(filmcountry.includes(country)){
+				if(filmcountry.toLowerCase().includes(country.toLowerCase())){
 					filteredFilms.push(EnrichedFilmData[i]);
 				}
 			}
@@ -425,6 +426,9 @@
 			var filteredFilms = [];
 			for( var i=0; i < EnrichedFilmData.length; i++)
 			{
+				if(EnrichedFilmData[i].avScore == "" || EnrichedFilmData[i].avScore == null){
+					continue;
+				}
 				var filmrating = EnrichedFilmData[i].avScore;
 				if(filmrating < rating){
 					filteredFilms.push(EnrichedFilmData[i]);
